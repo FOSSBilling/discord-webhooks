@@ -1,0 +1,442 @@
+{% extends 'layout_default.html.twig' %}
+
+{% import 'macro_functions.html.twig' as mf %}
+
+{% block meta_title %}
+    {% if webhook is defined %}
+        {{ 'Edit Webhook'|trans }}
+    {% else %}
+        {{ 'Create New Webhook'|trans }}
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="{{ '/'|alink }}">
+            <svg class="icon">
+                <use xlink:href="#home"/>
+            </svg>
+        </a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ 'discord'|alink }}">{{ 'Discord Webhooks'|trans }}</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+        {% if webhook is defined %}
+            {{ 'Edit Webhook'|trans }}
+        {% else %}
+            {{ 'Create New Webhook'|trans }}
+        {% endif %}
+    </li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            {% if webhook is defined %}
+                {{ 'Edit Webhook #%s'|trans|format(webhook.id) }}
+            {% else %}
+                {{ 'Create New Webhook'|trans }}
+            {% endif %}
+        </h3>
+    </div>
+
+    <form method="post" action="{% if webhook is defined %}{{ 'api/admin/discord/update'|link }}{% else %}{{ 'api/admin/discord/create'|link }}{% endif %}"
+          class="api-form" data-api-redirect="{{ 'discord'|alink }}">
+        {% if webhook is defined %}
+            <input type="hidden" name="id" value="{{ webhook.id }}"/>
+        {% endif %}
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label required" for="url">{{ 'Webhook URL'|trans }}</label>
+                        <input type="url" class="form-control" id="url" name="url"
+                               value="{% if webhook is defined %}{{ webhook.url }}{% endif %}"
+                               placeholder="https://discord.com/api/webhooks/..." required>
+                        <div class="form-text">
+                            {{ 'Enter the Discord webhook URL from your Discord server settings.'|trans }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ 'Status'|trans }}</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="active" name="active"
+                                   {% if webhook is not defined or webhook.active %}checked{% endif %}>
+                            <label class="form-check-label" for="active">
+                                {{ 'Active'|trans }}
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            {{ 'Enable or disable this webhook.'|trans }}
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div>
+                        <label class="form-label required">{{ 'Subscribe to Events'|trans }}</label>
+                        <div class="form-text mb-3">
+                            {{ 'Select which events should trigger notifications to this webhook.'|trans }}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="all_events" value="all_events"
+                                       {% if webhook is defined and 'all_events' in webhook.events %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="all_events">
+                                    {{ 'All Events'|trans }}
+                                </label>
+                                <div class="form-text">
+                                    {{ 'Subscribe to all current and future events.'|trans }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="specific-events">
+                            <h5 class="mb-3 text-primary">
+                                <svg class="icon me-2">
+                                    <use xlink:href="#key" />
+                                </svg>
+                                {{ 'Security Events'|trans }}
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onEventClientLoginFailed" value="onEventClientLoginFailed"
+                                               {% if webhook is defined and 'onEventClientLoginFailed' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onEventClientLoginFailed">
+                                            {{ 'Client Login Failed'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'A client attempted to login with invalid credentials'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onEventAdminLoginFailed" value="onEventAdminLoginFailed"
+                                               {% if webhook is defined and 'onEventAdminLoginFailed' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onEventAdminLoginFailed">
+                                            {{ 'Admin Login Failed'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An administrator attempted to login with invalid credentials'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterClientSignUp" value="onAfterClientSignUp"
+                                               {% if webhook is defined and 'onAfterClientSignUp' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterClientSignUp">
+                                            {{ 'New Client Signup'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'A new client has registered'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-primary">
+                                <svg class="icon me-2">
+                                    <use xlink:href="#orders" />
+                                </svg>
+                                {{ 'Order Events'|trans }}
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminOrderCreate" value="onAfterAdminOrderCreate"
+                                               {% if webhook is defined and 'onAfterAdminOrderCreate' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminOrderCreate">
+                                            {{ 'Order Created (Admin)'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An order was created by an admin'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterClientOrderCreate" value="onAfterClientOrderCreate"
+                                               {% if webhook is defined and 'onAfterClientOrderCreate' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterClientOrderCreate">
+                                            {{ 'Order Created (Client)'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An order was created by a client'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminOrderSuspend" value="onAfterAdminOrderSuspend"
+                                               {% if webhook is defined and 'onAfterAdminOrderSuspend' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminOrderSuspend">
+                                            {{ 'Order Suspended'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An order was suspended'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminOrderCancel" value="onAfterAdminOrderCancel"
+                                               {% if webhook is defined and 'onAfterAdminOrderCancel' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminOrderCancel">
+                                            {{ 'Order Cancelled'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An order was cancelled'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-primary">
+                                <svg class="icon me-2">
+                                    <use xlink:href="#invoices" />
+                                </svg>
+                                {{ 'Invoice & Transaction Events'|trans }}
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminInvoiceApprove" value="onAfterAdminInvoiceApprove"
+                                               {% if webhook is defined and 'onAfterAdminInvoiceApprove' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminInvoiceApprove">
+                                            {{ 'Invoice Approved'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An invoice was approved'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminInvoiceRefund" value="onAfterAdminInvoiceRefund"
+                                               {% if webhook is defined and 'onAfterAdminInvoiceRefund' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminInvoiceRefund">
+                                            {{ 'Invoice Refunded'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An invoice was refunded'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminTransactionCreate" value="onAfterAdminTransactionCreate"
+                                               {% if webhook is defined and 'onAfterAdminTransactionCreate' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminTransactionCreate">
+                                            {{ 'Transaction Created'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'A new transaction was recorded'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-primary">
+                                <svg class="icon me-2">
+                                    <use xlink:href="#help" />
+                                </svg>
+                                {{ 'Support Ticket Events'|trans }}
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterClientOpenTicket" value="onAfterClientOpenTicket"
+                                               {% if webhook is defined and 'onAfterClientOpenTicket' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterClientOpenTicket">
+                                            {{ 'New Ticket Opened'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'A client opened a new support ticket'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterAdminReplyTicket" value="onAfterAdminReplyTicket"
+                                               {% if webhook is defined and 'onAfterAdminReplyTicket' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterAdminReplyTicket">
+                                            {{ 'Ticket Replied (Admin)'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'An administrator replied to a ticket'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-checkbox" type="checkbox"
+                                               id="onAfterClientReplyTicket" value="onAfterClientReplyTicket"
+                                               {% if webhook is defined and 'onAfterClientReplyTicket' in webhook.events %}checked{% endif %}>
+                                        <label class="form-check-label" for="onAfterClientReplyTicket">
+                                            {{ 'Ticket Replied (Client)'|trans }}
+                                        </label>
+                                        <div class="form-text">
+                                            {{ 'A client replied to a ticket'|trans }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <svg class="icon me-2">
+                                    <use xlink:href="#help" />
+                                </svg>
+                                {{ 'How to get the webhook URL:'|trans }}
+                            </h5>
+                            <ol class="small mb-0">
+                                <li>{{ 'Open your Discord server'|trans }}</li>
+                                <li>{{ 'Go to channel settings'|trans }}</li>
+                                <li>{{ 'Click "Integrations"'|trans }}</li>
+                                <li>{{ 'Click "Create Webhook"'|trans }}</li>
+                                <li>{{ 'Copy the webhook URL'|trans }}</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer text-end">
+            <div class="d-flex">
+                <a href="{{ 'discord'|alink }}" class="btn btn-secondary">
+                    <svg class="icon me-2">
+                        <use xlink:href="#arrow-left" />
+                    </svg>
+                    {{ 'Cancel'|trans }}
+                </a>
+                <button type="submit" class="btn btn-primary ms-auto">
+                    <svg class="icon me-2">
+                        <use xlink:href="{% if webhook is defined %}#check{% else %}#plus{% endif %}" />
+                    </svg>
+                    {% if webhook is defined %}
+                        {{ 'Update Webhook'|trans }}
+                    {% else %}
+                        {{ 'Create Webhook'|trans }}
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allEventsCheckbox = document.getElementById('all_events');
+    const specificEventsSection = document.getElementById('specific-events');
+    const eventCheckboxes = document.querySelectorAll('.event-checkbox');
+    const form = document.querySelector('.api-form');
+    const eventsContainer = document.createElement('div');
+    eventsContainer.id = 'events-container';
+    form.appendChild(eventsContainer);
+
+    // Function to update hidden event inputs
+    function updateEventInputs() {
+        // Clear existing event inputs
+        eventsContainer.innerHTML = '';
+
+        if (allEventsCheckbox.checked) {
+            // Add hidden input for all_events
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'events[]';
+            input.value = 'all_events';
+            eventsContainer.appendChild(input);
+        } else {
+            // Add hidden inputs for each checked specific event
+            eventCheckboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'events[]';
+                    input.value = checkbox.value;
+                    eventsContainer.appendChild(input);
+                }
+            });
+        }
+    }
+
+    // Handle "All Events" checkbox
+    allEventsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            eventCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+            specificEventsSection.style.display = 'none';
+        } else {
+            specificEventsSection.style.display = 'block';
+        }
+        updateEventInputs();
+    });
+
+    // Handle individual event checkboxes
+    eventCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                allEventsCheckbox.checked = false;
+            }
+            updateEventInputs();
+        });
+    });
+
+    // Initialize display and event inputs based on current state
+    if (allEventsCheckbox.checked) {
+        specificEventsSection.style.display = 'none';
+    }
+    updateEventInputs();
+
+    // Form validation before submission
+    form.addEventListener('submit', function(e) {
+        const eventInputs = eventsContainer.querySelectorAll('input[name="events[]"]');
+
+        if (eventInputs.length === 0) {
+            e.preventDefault();
+            FOSSBilling.message('{{ "Please select at least one event."|trans }}', 'error');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

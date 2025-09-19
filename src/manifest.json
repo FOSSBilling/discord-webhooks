@@ -1,0 +1,12 @@
+{
+  "id": "discord",
+  "type": "mod",
+  "name": "Discord",
+  "description": "Discord/Slack notifications for FOSSBilling",
+  "icon_url": "icon.svg",
+  "homepage_url": "https://fossbilling.org",
+  "author": "FOSSBilling",
+  "author_url": "https://fossbilling.org/",
+  "license": "Apache 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
+  "version": "0.0.1"
+}
