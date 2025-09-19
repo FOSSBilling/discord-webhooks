@@ -1,55 +1,47 @@
-# Example module README file
+# Discord/Slack Webhooks Module
+A FOSSBilling extension module that enables real-time Discord/Slack notifications for billing events through webhooks.
 
-This module provides a starting point for the developers on creating their FOSSBilling module.
+**Important notice:** This module is made using Doctrine which isn't supported in FOSSBilling yet. We are working hard to introduce Doctrine support within FOSSBilling core. It should start working after support is added.
 
-Explore the files and comments in the code to understand the structure of the module better. See the social links on [our website](https://fossbilling.org) if you need further information. This module has its own [GitHub repository](https://github.com/FOSSBilling/example-module) where you can submit issues and pull requests.
+## Overview
+The Discord module allows you to send automated notifications to Discord channels when specific events occur in your FOSSBilling instance. This helps you stay informed about important business activities like new orders, failed payments, support tickets, and security events.
 
-In general, we use modules to extend the functionality of FOSSBilling.
+## Features
+- **Real-time Notifications**: Instant Discord messages when events occur
+- **Event Selection**: Choose specific events or subscribe to all events
+- **Multiple Webhooks**: Configure different webhooks for different channels or purposes
+- **Rich Embeds**: Formatted Discord messages with colors and structured information
 
-All modules can communicate with the other modules using their API endpoints.
+## Supported Events
+### Security Events
+- **Client Login Failed**: When a client attempts to login with invalid credentials
+- **Admin Login Failed**: When an administrator attempts to login with invalid credentials
+- **New Client Signup**: When a new client registers an account
 
-## Technical requirements about modules
+### Order Events
+- **Order Created (Admin)**: When an administrator creates an order
+- **Order Created (Client)**: When a client places an order
+- **Order Suspended**: When an order is suspended
+- **Order Cancelled**: When an order is cancelled
 
-## Required
+### Invoice & Transaction Events
+- **Invoice Approved**: When an invoice is approved for payment
+- **Invoice Refunded**: When an invoice refund is processed
+- **Transaction Created**: When a new payment transaction is recorded
 
-* Module folder has to contain a **manifest.json** file to describe itself. The module engine will look for this file to find information about your extension.
+### Support Ticket Events
+- **New Ticket Opened**: When a client opens a new support ticket
+- **Ticket Replied (Admin)**: When an administrator replies to a ticket
+- **Ticket Replied (Client)**: When a client replies to a ticket
 
-## Optional
+## Installation
+1. **Module Installation**: The Discord module should be placed in the `src/modules/Discord/` directory of your FOSSBilling installation.
 
-* **README.md** - A file which generally is used to hold a getting started guide or installation instructions for your module.
-* **html_admin** - A folder holding front-end templates (`*.html.twig files`) for the administrator panel.
-* **html_client** - A folder holding front-end templates (`*.html.twig files`) for the client / guest area.
+2. **Enable the Module**:
+   - Navigate to **Extensions** in your FOSSBilling admin panel
+   - Find the Discord module and activate it
 
-### Controller folder
+3. **Database Setup**: The module will automatically create the necessary database tables when first activated.
 
-* **Admin.php** - Defines the module's routes and navigation items for the administrator panel.
-* **Client.php** - Used to define the module's routes for the client / guest area.
-
-### Api folder
-
-* **Admin.php** - Administrator API, only authorized administrators will be able to call these endpoints.
-* **Client.php** - Client API, only logged in clients will be able to call these endpoints.
-* **Guest.php** - Guest API, no authorization is needed for these endpoints. Don't provide confidential data over these endpoints. Anybody over the internet will be able to access these information, including bots.
-
-## Tips
-
-We recommend hosting your extensions on a public [GitHub](https://github.com) repository.
-
-### Automated compatibility checking
-
-As FOSSBilling evolves and matures, its internal functionality changes, which can create compatibility issues between your module and FOSSBilling.
-To help developers catch these issues early on, we've designed a workflow that enables you to perform a PHPStan analysis of your module with both the latest FOSSBilling release and its preview builds.
-While PHPStan cannot perform live tests, it's a useful tool to verify that your module doesn't reference missing functions, use incorrect types, or have other common low-level issues.
-
-#### Setup
-
-More in-depth instructions are planned. For now, check out the required files:
-
-* [php-ci.yml](https://github.com/FOSSBilling/example-module/blob/main/.github/workflows/php-ci.yml)
-* [phpstan.neon](https://github.com/FOSSBilling/example-module/blob/main/phpstan.neon)
-
-## Licensing
-This extension is open source software and is released under the Apache v2.0 license. See [LICENSE](LICENSE) for the full license terms.
-
-This product includes the following third party work:
-* Open Source Iconography by [Pictogrammers](https://pictogrammers.com/) licensed under the [Pictogrammers Free License](https://pictogrammers.com/docs/general/license/).
+## License
+This module is part of FOSSBilling and is licensed under the Apache License 2.0.
